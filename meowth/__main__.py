@@ -13,12 +13,12 @@ from dateutil.relativedelta import relativedelta
 from dateutil import tz
 import copy
 import functools
+import textwrap
 from time import strftime
 from logs import init_loggers
 import discord
 from discord.ext import commands
 import spelling
-import textwrap
 from PIL import Image
 from PIL import ImageFilter
 from PIL import ImageEnhance
@@ -474,6 +474,7 @@ async def expire_wild(message):
     try:
         expiremsg = _('**This {pokemon} has despawned!**').format(pokemon=guild_dict[guild.id]['wildreport_dict'][message.id]['pokemon'].title())
         await message.edit(embed=discord.Embed(description=expiremsg, colour=message.embeds[0].colour.value))
+        await message.clear_reactions()
     except discord.errors.NotFound:
         pass
     try:
@@ -3181,7 +3182,7 @@ async def _eggassume(args, raid_channel, author=None):
     except discord.errors.NotFound:
         egg_report = None
     await raid_channel.send(_('{pokemon} in {location_details}').format(pokemon=raidrole, location_details=eggdetails['address']))
-    if egglevel == "EX" or int(egglevel) >= 3:
+    if (egglevel == "EX" or int(egglevel) >= 3) and not eggdetails.get('pokemon', None):
         ctrs_dict = await _get_generic_counters(raid_channel.guild, entered_raid, weather)
         ctrsmsg = "Here are the best counters for the raid boss in currently known weather conditions! Update weather with **!weather**. If you know the moveset of the boss, you can react to this message with the matching emoji and I will update the counters."
         ctrsmessage = await raid_channel.send(content=ctrsmsg,embed=ctrs_dict[0]['embed'])
@@ -5835,16 +5836,43 @@ async def research(ctx):
     await ctx.channel.send(listmsg)
 
 async def _researchlist(ctx):
-    research_dict = copy.deepcopy(guild_dict[ctx.guild.id]['questreport_dict'])
+    research_dict = copy.deepcopy(guild_dict[ctx.guild.id].get('questreport_dict', None))
     questmsg = ""
     for questid in research_dict:
         if research_dict[questid]['reportchannel'] == ctx.message.channel.id:
-            questmsg += _('\n🔹')
-            questmsg += _("**Location**: {location}, **Quest**: {quest}, **Reward**: {reward}".format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title()))
+            try:
+                questreportmsg = await ctx.message.channel.get_message(questid)
+                questauthor = ctx.channel.guild.get_member(research_dict[questid]['reportauthor'])
+                questmsg += _('\n🔹')
+                questmsg += _("**Location**: {location}, **Quest**: {quest}, **Reward**: {reward}, **Reported By**: {author}".format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name))
+            except discord.errors.NotFound:
+                pass
     if questmsg:
         listmsg = _(' **Here\'s the current research reports for {channel}**\n{questmsg}').format(channel=ctx.message.channel.name.capitalize(),questmsg=questmsg)
     else:
         listmsg = _(" There are no reported research reports. Report one with **!research**")
+    return listmsg
+    
+@list.command()
+@checks.citychannel()
+async def wilds(ctx):
+    """List the wilds for the channel
+    Usage: !list wilds"""
+    listmsg = _('**Meowth!**')
+    listmsg += await _wildlist(ctx)
+    await ctx.channel.send(listmsg)
+
+async def _wildlist(ctx):
+    wild_dict = copy.deepcopy(guild_dict[ctx.guild.id]['wildreport_dict'])
+    wildmsg = ""
+    for wildid in wild_dict:
+        if wild_dict[wildid]['reportchannel'] == ctx.message.channel.id:
+            wildmsg += ('\n🔹')
+            wildmsg += _("**Pokemon**: {pokemon}, **Location**: {location}".format(pokemon=wild_dict[wildid]['pokemon'].title(),location=wild_dict[wildid]['location'].title()))
+    if wildmsg:
+        listmsg = _(' **Here\'s the current wild reports for {channel}**\n{wildmsg}').format(channel=ctx.message.channel.name.capitalize(),wildmsg=wildmsg)
+    else:
+        listmsg = _(" There are no reported wild pokemon. Report one with **!wild <pokemon> <location>**")
     return listmsg
     
 try:
