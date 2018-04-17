@@ -3741,11 +3741,13 @@ async def timerset(ctx, timer):
             
 @Meowth.command()
 @checks.raidchannel()
-async def timerset(ctx, timer):
+async def timerset(ctx, *, timer):
     'Set the remaining duration on a raid.\n\n    Usage: !timerset <minutes>\n    Works only in raid channels, can be set or overridden by anyone.\n    Meowth displays the end time in HH:MM local time.'
     message = ctx.message
     channel = message.channel
     guild = message.guild
+    
+    timer = timer.split()
     if (not checks.check_exraidchannel(ctx)):
         if guild_dict[guild.id]['raidchannel_dict'][channel.id]['type'] == 'egg':
             raidlevel = guild_dict[guild.id]['raidchannel_dict'][channel.id]['egglevel']
@@ -3755,19 +3757,21 @@ async def timerset(ctx, timer):
             raidlevel = get_level(guild_dict[guild.id]['raidchannel_dict'][channel.id]['pokemon'])
             raidtype = _('Raid')
             maxtime = raid_info['raid_eggs'][raidlevel]['raidtime']
-        if timer.isdigit():
-            raidexp = int(timer)
-        elif ':' in timer:
-            (h, m) = re.sub('[a-zA-Z]', '', timer).split(':', maxsplit=1)
-            if h == '':
-                h = '0'
-            if m == '':
-                m = '0'
-            if h.isdigit() and m.isdigit():
-                raidexp = (60 * int(h)) + int(m)
-            else:
-                await channel.send(_("Meowth! I couldn't understand your time format. Try again like this: **!timerset <minutes>**"))
+        if timer[-1].isdigit():
+            raidexp = int(timer[-1])
+        elif (':' in timer[-1]) or ('am' == timer[-1].lower()) or ('pm' == timer[-1].lower()):
+            now = datetime.datetime.utcnow() + datetime.timedelta(hours=guild_dict[message.channel.guild.id]['offset'])
+            try:
+                if ('am' == timer[-1].lower()) or ('pm' == timer[-1].lower()):
+                    time_split = timer[-2:]
+                    hatch = datetime.datetime.strptime(' '.join(time_split), '%I:%M %p').replace(year=now.year, month=now.month, day=now.day)
+                else:
+                    time_split = timer[-1:]
+                    hatch = datetime.datetime.strptime(' '.join(time_split), '%H:%M').replace(year=now.year, month=now.month, day=now.day)
+            except ValueError:
+                await message.channel.send(_("Your time wasn't formatted correctly. Match this format: **HH:MM AM/PM** (You can also omit AM/PM and use 24-hour time!)"))
                 return
+            raidexp = int((hatch - now).total_seconds() / 60)
         else:
             await channel.send(_("Meowth! I couldn't understand your time format. Try again like this: **!timerset <minutes>**"))
             return
