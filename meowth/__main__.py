@@ -2897,18 +2897,21 @@ async def _raid(message):
     if raid_split[(- 1)].isdigit():
         raidexp = int(raid_split[(- 1)])
         del raid_split[(- 1)]
-    elif ':' in raid_split[(- 1)]:
-        raid_split[(- 1)] = re.sub('[a-zA-Z]', '', raid_split[(- 1)])
-        if raid_split[(- 1)].split(':')[0] == '':
-            endhours = 0
-        else:
-            endhours = int(raid_split[(- 1)].split(':')[0])
-        if raid_split[(- 1)].split(':')[1] == '':
-            endmins = 0
-        else:
-            endmins = int(raid_split[(- 1)].split(':')[1])
-        raidexp = (60 * endhours) + endmins
-        del raid_split[(- 1)]
+    elif (':' in raid_split[-1]) or ('am' == raid_split[-1].lower()) or ('pm' == raid_split[-1].lower()):
+        now = datetime.datetime.utcnow() + datetime.timedelta(hours=guild_dict[message.channel.guild.id]['offset'])
+        try:
+            if ('am' == raid_split[-1].lower()) or ('pm' == raid_split[-1].lower()):
+                time_split = raid_split[-2:]
+                hatch = datetime.datetime.strptime(' '.join(time_split), '%I:%M %p').replace(year=now.year, month=now.month, day=now.day)
+                del raid_split[-2:]
+            else:
+                time_split = raid_split[-1:]
+                hatch = datetime.datetime.strptime(' '.join(time_split), '%H:%M').replace(year=now.year, month=now.month, day=now.day)
+                del raid_split[-1]
+        except ValueError:
+            await message.channel.send(_("Your time wasn't formatted correctly. Match this format: **HH:MM AM/PM** (You can also omit AM/PM and use 24-hour time!)"))
+            return
+        raidexp = int((hatch - now).total_seconds() / 60)
     else:
         raidexp = False
     rgx = '[^a-zA-Z0-9]'
@@ -3037,18 +3040,21 @@ async def _raidegg(message):
     if raidegg_split[(- 1)].isdigit():
         raidexp = int(raidegg_split[(- 1)])
         del raidegg_split[(- 1)]
-    elif ':' in raidegg_split[(- 1)]:
-        raidegg_split[(- 1)] = re.sub('[a-zA-Z]', '', raidegg_split[(- 1)])
-        if raidegg_split[(- 1)].split(':')[0] == '':
-            endhours = 0
-        else:
-            endhours = int(raidegg_split[(- 1)].split(':')[0])
-        if raidegg_split[(- 1)].split(':')[1] == '':
-            endmins = 0
-        else:
-            endmins = int(raidegg_split[(- 1)].split(':')[1])
-        raidexp = (60 * endhours) + endmins
-        del raidegg_split[(- 1)]
+    elif (':' in raidegg_split[-1]) or ('am' == raidegg_split[-1].lower()) or ('pm' == raidegg_split[-1].lower()):
+        now = datetime.datetime.utcnow() + datetime.timedelta(hours=guild_dict[message.channel.guild.id]['offset'])
+        try:
+            if ('am' == raidegg_split[-1].lower()) or ('pm' == raidegg_split[-1].lower()):
+                time_split = raidegg_split[-2:]
+                hatch = datetime.datetime.strptime(' '.join(time_split), '%I:%M %p').replace(year=now.year, month=now.month, day=now.day)
+                del raidegg_split[-2:]
+            else:
+                time_split = raidegg_split[-1:]
+                hatch = datetime.datetime.strptime(' '.join(time_split), '%H:%M').replace(year=now.year, month=now.month, day=now.day)
+                del raidegg_split[-1]
+        except ValueError:
+            await message.channel.send(_("Your time wasn't formatted correctly. Match this format: **HH:MM AM/PM** (You can also omit AM/PM and use 24-hour time!)"))
+            return
+        raidexp = int((hatch - now).total_seconds() / 60)
     else:
         raidexp = False
     if raidexp is not False:
