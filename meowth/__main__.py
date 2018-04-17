@@ -2911,7 +2911,7 @@ async def _raid(message):
         except ValueError:
             await message.channel.send(_("Your time wasn't formatted correctly. Match this format: **HH:MM AM/PM** (You can also omit AM/PM and use 24-hour time!)"))
             return
-        raidexp = int((hatch - now).total_seconds() / 60)
+        raidexp = int((hatch - now).total_seconds() / 60) + 1
     else:
         raidexp = False
     rgx = '[^a-zA-Z0-9]'
@@ -3054,7 +3054,7 @@ async def _raidegg(message):
         except ValueError:
             await message.channel.send(_("Your time wasn't formatted correctly. Match this format: **HH:MM AM/PM** (You can also omit AM/PM and use 24-hour time!)"))
             return
-        raidexp = int((hatch - now).total_seconds() / 60)
+        raidexp = int((hatch - now).total_seconds() / 60) + 1
     else:
         raidexp = False
     if raidexp is not False:
@@ -3771,7 +3771,7 @@ async def timerset(ctx, *, timer):
             except ValueError:
                 await message.channel.send(_("Your time wasn't formatted correctly. Match this format: **HH:MM AM/PM** (You can also omit AM/PM and use 24-hour time!)"))
                 return
-            raidexp = int((hatch - now).total_seconds() / 60)
+            raidexp = int((hatch - now).total_seconds() / 60) + 1
         else:
             await channel.send(_("Meowth! I couldn't understand your time format. Try again like this: **!timerset <minutes>**"))
             return
