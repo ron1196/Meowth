@@ -1093,7 +1093,7 @@ async def on_raw_reaction_add(emoji, message_id, channel_id, user_id):
     message = await channel.get_message(message_id)
     guild = message.guild
     user = guild.get_member(user_id)
-    if channel.id in guild_dict[guild.id]['raidchannel_dict'] and message.id == guild_dict[guild.id]['raidchannel_dict'][channel.id]['ctrsmessage'] and user_id != Meowth.user.id:
+    if channel.id in guild_dict[guild.id]['raidchannel_dict'] and message.id == guild_dict[guild.id]['raidchannel_dict'][channel.id].get('ctrsmessage', None) and user_id != Meowth.user.id:
         ctrs_dict = guild_dict[guild.id]['raidchannel_dict'][channel.id]['ctrs_dict']
         for i in ctrs_dict:
             if ctrs_dict[i]['emoji'] == str(emoji):
