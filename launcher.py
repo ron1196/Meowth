@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.6
 
 import sys
 import os
@@ -6,7 +6,7 @@ import time
 import subprocess
 import argparse
 
-#Launcher for Meowthv2
+#Launcher for Meowth
 
 def parse_cli_args():
     parser = argparse.ArgumentParser(
