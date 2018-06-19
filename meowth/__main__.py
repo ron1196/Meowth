@@ -7189,12 +7189,12 @@ async def _wantlist(ctx):
 async def research(ctx):
     """List the quests for the channel
     Usage: !list research"""
-    listmsg = _('**Meowth!**')
-    listmsg += await _researchlist(ctx)
+    listmsg = await _researchlist(ctx)
     await ctx.channel.send(embed=discord.Embed(colour=ctx.guild.me.colour, description=listmsg))
     
 async def _researchlist(ctx):
     research_dict = copy.deepcopy(guild_dict[ctx.guild.id].get('questreport_dict',{}))
+    pokestop_emoji = parse_emoji(ctx.guild, ':pokestop:')
     questmsg = ""
     for questid in research_dict:
         if research_dict[questid]['reportchannel'] == ctx.message.channel.id:
@@ -7203,14 +7203,16 @@ async def _researchlist(ctx):
                 questauthor = ctx.channel.guild.get_member(research_dict[questid]['reportauthor'])
                 if questauthor:
                     if len(questmsg) < 1500:
-                        questmsg += ('\n🔹')
+                        questmsg += (f"\n{pokestop_emoji}  ")
                         questmsg += _("**Reward**: {reward}, [PokeStop]({url}): {location}, **Quest**: {quest}, **Reported By**: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
+                        questmsg += "\n"
                     else:
                         listmsg = _('Meowth! **Here\'s the current research reports for {channel}**\n{questmsg}').format(channel=ctx.message.channel.name.capitalize(),questmsg=questmsg)
                         await ctx.channel.send(embed=discord.Embed(colour=ctx.guild.me.colour, description=listmsg))
                         questmsg = ""
-                        questmsg += ('\n🔹')
+                        questmsg += (f"\n{pokestop_emoji}  ")
                         questmsg += _("**Reward**: {reward}, [PokeStop]({url}): {location}, **Quest**: {quest}, **Reported By**: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
+                        questmsg += "\n"
             except discord.errors.NotFound:
                 continue
     if questmsg:
