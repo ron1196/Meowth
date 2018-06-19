@@ -7204,13 +7204,13 @@ async def _researchlist(ctx):
                 if questauthor:
                     if len(questmsg) < 1500:
                         questmsg += ('\n🔹')
-                        questmsg += _("**Reward**: {reward}, **Pokestop**: [{location}]({url}), **Quest**: {quest}, **Reported By**: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
+                        questmsg += _("**Reward**: {reward}, **Pokestop**: {location}([Directions])({url}), **Quest**: {quest}, **Reported By**: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
                     else:
                         listmsg = _('Meowth! **Here\'s the current research reports for {channel}**\n{questmsg}').format(channel=ctx.message.channel.name.capitalize(),questmsg=questmsg)
                         await ctx.channel.send(embed=discord.Embed(colour=ctx.guild.me.colour, description=listmsg))
                         questmsg = ""
                         questmsg += ('\n🔹')
-                        questmsg += _("**Reward**: {reward}, **Pokestop**: [{location}]({url}), **Quest**: {quest}, **Reported By**: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
+                        questmsg += _("**Reward**: {reward}, **Pokestop**: {location}([Directions])({url}), **Quest**: {quest}, **Reported By**: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
             except discord.errors.NotFound:
                 continue
     if questmsg:
