@@ -7188,12 +7188,11 @@ async def _wantlist(ctx):
 @checks.allowresearchreport()
 async def research(ctx):
     """List the quests for the channel
-
     Usage: !list research"""
     listmsg = _('**Meowth!**')
     listmsg += await _researchlist(ctx)
-    await ctx.channel.send(listmsg)
-
+    await ctx.channel.send(embed=discord.Embed(colour=ctx.guild.me.colour, description=listmsg))
+    
 async def _researchlist(ctx):
     research_dict = copy.deepcopy(guild_dict[ctx.guild.id].get('questreport_dict',{}))
     questmsg = ""
@@ -7205,7 +7204,7 @@ async def _researchlist(ctx):
                 if questauthor:
                     if len(questmsg) < 1500:
                         questmsg += ('\n🔹')
-                        questmsg += _("**Reward**: {reward}, **Pokestop**: [{location}]({url}), **Quest**: {quest}, **Reported By**: {author}".format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None)))
+                        questmsg += _("**Reward**: {reward}, **Pokestop**: [{location}]({url}), **Quest**: {quest}, **Reported By**: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
                     else:
                         listmsg = _('Meowth! **Here\'s the current research reports for {channel}**\n{questmsg}').format(channel=ctx.message.channel.name.capitalize(),questmsg=questmsg)
                         await ctx.channel.send(embed=discord.Embed(colour=ctx.guild.me.colour, description=listmsg))
