@@ -7184,7 +7184,7 @@ async def _wantlist(ctx):
         listmsg = _(" You don\'t have any wants! use **!want** to add some.")
     return listmsg
 
-@_list.command()
+@_list.command(aliases=["res"])
 @checks.allowresearchreport()
 async def research(ctx):
     """List the quests for the channel
