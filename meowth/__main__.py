@@ -5185,7 +5185,10 @@ async def starttime(ctx,*,start_time=""):
             maxtime = (rc_d['exp'] - time.time()) / 60
         if len(start_split) > 0:
             alreadyset = rc_d.get('starttime',False)
-            if ('am' in ' '.join(start_split).lower()) or ('pm' in ' '.join(start_split).lower()):
+            if ("hatch" == ' '.join(start_split).lower() or "h" == ' '.join(start_split).lower()):
+                end = now + datetime.timedelta(seconds=rc_d['exp'] - time.time())
+                start = datetime.datetime.strptime(end.strftime('%I:%M %p'), '%I:%M %p').replace(year=now.year, month=now.month, day=now.day)
+            elif ('am' in ' '.join(start_split).lower()) or ('pm' in ' '.join(start_split).lower()):
                 try:
                     start = datetime.datetime.strptime(' '.join(start_split), '%I:%M %p').replace(year=now.year, month=now.month, day=now.day)
                 except ValueError:
@@ -5208,7 +5211,7 @@ async def starttime(ctx,*,start_time=""):
             if now > start and egglevel != 'EX':
                 await channel.send(_('Meowth! Please enter a time in the future.'))
                 return
-            if int(total) < int(mintime) and egglevel != 'EX':
+            if int(total) < int(mintime)-1 and egglevel != 'EX':
                 await channel.send(_('Meowth! The egg will not hatch by then!'))
                 return
             if alreadyset:
