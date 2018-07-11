@@ -275,12 +275,9 @@ def weakness_to_str(guild, weak_list):
 
 
 def sanitize_channel_name(name):
-    # Remove all characters other than alphanumerics,
-    # dashes, underscores, and spaces
-    ret = re.sub('[^a-zA-Z0-9 _\\-]', '', name)
     # Replace spaces with dashes
-    ret = ret.replace(' ', '-')
-    return ret
+    name = name.replace(' ', '-')
+    return name
 
 # Given a string, if it fits the pattern :emoji name:,
 # and <emoji_name> is in the server's emoji list, then
@@ -333,8 +330,7 @@ def create_gmaps_query(details, channel, type="raid"):
     #then channel location hints are not needed in the  maps query
     if re.match (r'^\s*-?\d{1,2}\.?\d*,\s*-?\d{1,3}\.?\d*\s*$', details): #regex looks for lat/long in the format similar to 42.434546, -83.985195.
         return "https://www.google.com/maps/search/?api=1&query={0}".format('+'.join(details_list))
-    loc_list = guild_dict[channel.guild.id]['configure_dict'][report]['report_channels'][channel.id].split()
-    return 'https://www.google.com/maps/search/?api=1&query={0}+{1}'.format('+'.join(details_list), '+'.join(loc_list))
+    return None
     
     
 # Given a User, check that it is Meowth's master
@@ -4720,7 +4716,7 @@ async def _exraid(ctx, location):
         p_name = get_name(p).title()
         p_type = get_type(message.guild, p)
         boss_list.append((((p_name + ' (') + str(p)) + ') ') + ''.join(p_type))
-    raid_channel_name = _('ex-raid-egg-')
+    raid_channel_name = _('ex-')
     raid_channel_name += sanitize_channel_name(raid_details)
     raid_channel_overwrite_list = channel.overwrites
     if guild_dict[channel.guild.id]['configure_dict']['invite']['enabled']:
@@ -4891,7 +4887,8 @@ async def research(ctx, *, details = None):
                 break
             location, quest, reward = research_split
             loc_url = create_gmaps_query(location, message.channel, type="research")
-            location = location.replace(loc_url,"").strip()
+            if loc_url:
+                location = location.replace(loc_url,"").strip()
             research_embed.add_field(name=_("**Pokestop:**"),value='\n'.join(textwrap.wrap(location.title(), width=30)),inline=True)
             research_embed.add_field(name=_("**Quest:**"),value='\n'.join(textwrap.wrap(quest.title(), width=30)),inline=True)
             research_embed.add_field(name=_("**Reward:**"),value='\n'.join(textwrap.wrap(reward.title(), width=30)),inline=True)
@@ -4914,7 +4911,8 @@ async def research(ctx, *, details = None):
             elif pokestopmsg:
                 location = pokestopmsg.clean_content
                 loc_url = create_gmaps_query(location, message.channel, type="research")
-                location = location.replace(loc_url,"").strip()
+                if loc_url:
+                    location = location.replace(loc_url,"").strip()
             await pokestopmsg.delete()
             research_embed.add_field(name=_("**Pokestop:**"),value='\n'.join(textwrap.wrap(location.title(), width=30)),inline=True)
             research_embed.set_field_at(0, name=research_embed.fields[0].name, value=_("Great! Now, reply with the **quest** that you received from **{location}**. You can reply with **cancel** to stop anytime.\n\nHere's what I have so far:").format(location=location), inline=False)
@@ -4962,9 +4960,15 @@ async def research(ctx, *, details = None):
             role = discord.utils.get(guild.roles, name=pkmn_match)
             if role:
                 roletest = _("{pokemon} - ").format(pokemon=role.mention)
-        research_msg = _("{roletest}Field Research reported by {author}").format(roletest=roletest,author=author.mention)
-        research_embed.title = _('Meowth! Click here for my directions to the research!')
-        research_embed.description = _("Ask {author} if my directions aren't perfect!").format(author=author.name)
+        research_msg = _("{roletest}Field Research reported by {author}").format(roletest=roletest,author=author.name)
+        if loc_url:
+            research_embed_title = 'Click here for my directions to the research!'
+            research_embed_description = ""
+        else:
+            research_embed_title = ''
+            research_embed_description = "Ask {author} for directions!".format(author=author.name)
+        research_embed.title = research_embed_title
+        research_embed.description = research_embed_description
         research_embed.url = loc_url
         confirmation = await channel.send(research_msg,embed=research_embed)
         research_dict = copy.deepcopy(guild_dict[guild.id].get('questreport_dict',{}))
@@ -7301,14 +7305,14 @@ async def _researchlist(ctx):
                 if questauthor:
                     if len(questmsg) < 1500:
                         questmsg += (f"\n{pokestop_emoji}  ")
-                        questmsg += _("**Reward**: {reward}, [PokeStop]({url}): {location}, **Quest**: {quest}, **Reported By**: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
+                        questmsg += _("Reward: {reward}, [PokeStop]({url}): {location}, Quest: {quest}, Reported By: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
                         questmsg += "\n"
                     else:
                         listmsg = _('Meowth! **Here\'s the current research reports for {channel}**\n{questmsg}').format(channel=ctx.message.channel.name.capitalize(),questmsg=questmsg)
                         await ctx.channel.send(embed=discord.Embed(colour=ctx.guild.me.colour, description=listmsg))
                         questmsg = ""
                         questmsg += (f"\n{pokestop_emoji}  ")
-                        questmsg += _("**Reward**: {reward}, [PokeStop]({url}): {location}, **Quest**: {quest}, **Reported By**: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
+                        questmsg += _("Reward: {reward}, [PokeStop]({url}): {location}, Quest: {quest}, Reported By: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
                         questmsg += "\n"
             except discord.errors.NotFound:
                 continue
