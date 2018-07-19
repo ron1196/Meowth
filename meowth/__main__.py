@@ -2863,6 +2863,7 @@ async def _configure_meetup(ctx):
     guild = ctx.message.guild
     owner = ctx.message.author
     config_dict_temp = getattr(ctx, 'config_dict_temp',copy.deepcopy(guild_dict[guild.id]['configure_dict']))
+    config_dict_temp['meetup'] = {}
     await owner.send(embed=discord.Embed(colour=discord.Colour.lighter_grey(), description=_("Meetup Reporting allows users to report meetups with **!meetup** or **!event**. Meetup reports are contained within one or more channels. Each channel will be able to represent different areas/communities. I'll need you to provide a list of channels in your server you will allow reports from in this format: `channel-name, channel-name, channel-name`\n\nExample: `kansas-city-meetups, hull-meetups, sydney-meetups`\n\nIf you do not require meetup reporting, you may want to disable this function.\n\nRespond with: **N** to disable, or the **channel-name** list to enable, each seperated with a comma and space:")).set_author(name=_('Meetup Reporting Channels'), icon_url=Meowth.user.avatar_url))
     citychannel_dict = {}
     while True:
@@ -6963,8 +6964,8 @@ async def _interest(ctx, tag=False, team=False):
         members_count = (f"({trainer_dict[trainer]['count']})  " if trainer_dict[trainer]['count'] > 1 else "") + mystic_emoji * int(trainer_dict[trainer]['party']['mystic']) + valor_emoji * int(trainer_dict[trainer]['party']['valor']) + instinct_emoji * int(trainer_dict[trainer]['party']['instinct'])
         want_list = f"({', '.join([x.title() for x in trainer_dict[trainer]['interest']])})" if trainer_dict[trainer].get('interest', None) else ""
         if trainer_dict[trainer]['status']['maybe']:
-            name_list.append(f"\t {bulletpoint}**{user.display_name}** {members_count}  {want_list}")
-            maybe_list.append(f"\t {bulletpoint}**{user.mention}** {members_count}  {want_list}")
+            name_list.append(f"\t {bulletpoint}**{user.display_name}** {members_count}")
+            maybe_list.append(f"\t {bulletpoint}**{user.mention}** {members_count}")
             if user and team == False:
                 ctx_maybecount += trainer_dict[trainer]['status']['maybe']
             elif user and team and trainer_dict[trainer]['party'][team]:
@@ -7023,8 +7024,8 @@ async def _otw(ctx, tag=False, team=False):
         members_count = (f"({trainer_dict[trainer]['count']})  " if trainer_dict[trainer]['count'] > 1 else "") + mystic_emoji * int(trainer_dict[trainer]['party']['mystic']) + valor_emoji * int(trainer_dict[trainer]['party']['valor']) + instinct_emoji * int(trainer_dict[trainer]['party']['instinct'])
         want_list = f"({', '.join([x.title() for x in trainer_dict[trainer]['interest']])})" if trainer_dict[trainer].get('interest', None) else ""
         if trainer_dict[trainer]['status']['coming']:
-            name_list.append(f"\t {bulletpoint}**{user.display_name}** {members_count}  {want_list}")
-            otw_list.append(f"\t {bulletpoint}**{user.mention}** {members_count}  {want_list}")
+            name_list.append(f"\t {bulletpoint}**{user.display_name}** {members_count}")
+            otw_list.append(f"\t {bulletpoint}**{user.mention}** {members_count}")
             if user and team == False:
                 ctx_comingcount += trainer_dict[trainer]['status']['coming']
             elif user and team and trainer_dict[trainer]['party'][team]:
@@ -7085,8 +7086,8 @@ async def _waiting(ctx, tag=False, team=False):
         members_count = (f"({trainer_dict[trainer]['count']})  " if trainer_dict[trainer]['count'] > 1 else "") + mystic_emoji * int(trainer_dict[trainer]['party']['mystic']) + valor_emoji * int(trainer_dict[trainer]['party']['valor']) + instinct_emoji * int(trainer_dict[trainer]['party']['instinct'])
         want_list = f"({', '.join([x.title() for x in trainer_dict[trainer]['interest']])})" if trainer_dict[trainer].get('interest', None) else ""
         if trainer_dict[trainer]['status']['here']:
-            name_list.append(f"\t {bulletpoint}**{user.display_name}** {members_count}  {want_list}")
-            here_list.append(f"\t {bulletpoint}**{user.mention}** {members_count}  {want_list}")
+            name_list.append(f"\t {bulletpoint}**{user.display_name}** {members_count}")
+            here_list.append(f"\t {bulletpoint}**{user.mention}** {members_count}")
             if user and team == False:
                 ctx_herecount += trainer_dict[trainer]['status']['here']
             elif user and team and trainer_dict[trainer]['party'][team]:
