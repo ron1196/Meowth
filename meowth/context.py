@@ -10,8 +10,9 @@ class Context(commands.Context):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.get = GetTools(self)
-        guild_data = self.bot.guild_dict[self.guild.id]
-        self.data = settings.GuildData(self, guild_data)
+        if self.guild:
+            guild_data = self.bot.guild_dict[self.guild.id]
+            self.data = settings.GuildData(self, guild_data)
 
     async def codeblock(self, contents, syntax="py", send=True, title=None):
         paginator = commands.Paginator(prefix=f'```{syntax}', max_size=1900)
@@ -86,12 +87,15 @@ class GetTools:
 
     async def user(self, search_term):
         """Get a user by ID or name.
+
         If an ID is provided, it will return a user even if they don't share a
         guild with the bot.
+
         Parameters
         -----------
         search_term: :class:`id` or :class:`str`
             The user ID, name or name with discriminator
+
         Returns
         --------
         :class:`discord.User` or :obj:`None`
@@ -117,6 +121,7 @@ class GetTools:
 
     async def message(self, id, channel=None, guild=None):
         """Get a message from the current or specified channels.
+
         Parameters
         -----------
         id: :class:`int`
@@ -124,6 +129,7 @@ class GetTools:
         channel: :class:`discord.TextChannel`, :obj:str or :obj:int, optional
             Specify channel other than the current one. Accepts a discord
             `TextChannel`, channel ID as `int`, or channel name as `str`.
+
         Returns
         --------
         :class:`discord.Message` or :obj:`None`
@@ -145,6 +151,7 @@ class GetTools:
 
     def channel(self, search_term, guild=None):
         """Get a channel from the current or specified guild.
+
         Parameters
         -----------
         search_term: :class:`id` or :class:`str`
@@ -152,6 +159,7 @@ class GetTools:
         guild: :class:`discord.Guild`, :obj:`int` or :obj:`str`, optional
             Specify guild other than the current one. Accepts a discord
             `Guild`, channel ID as `int`, or channel name as `str`.
+
         Returns
         --------
         :class:`discord.abc.GuildChannel` or :obj:`None`
@@ -171,6 +179,7 @@ class GetTools:
 
     def text_channel(self, search_term, guild=None):
         """Get a text channel from the current or specified guild.
+
         Parameters
         -----------
         search_term: :class:`id` or :class:`str`
@@ -178,6 +187,7 @@ class GetTools:
         guild: :class:`discord.Guild`, :obj:`int` or :obj:`str`, optional
             Specify guild other than the current one. Accepts a discord
             `Guild`, channel ID as `int`, or channel name as `str`.
+
         Returns
         --------
         :class:`discord.TextChannel` or :obj:`None`
@@ -200,6 +210,7 @@ class GetTools:
 
     def voice_channel(self, search_term, guild=None):
         """Get a voice channel from the current or specified guild.
+
         Parameters
         -----------
         search_term: :class:`id` or :class:`str`
@@ -207,6 +218,7 @@ class GetTools:
         guild: :class:`discord.Guild`, :obj:`int` or :obj:`str`, optional
             Specify guild other than the current one. Accepts a discord
             `Guild`, channel ID as `int`, or channel name as `str`.
+
         Returns
         --------
         :class:`discord.VoiceChannel` or :obj:`None`
@@ -226,6 +238,7 @@ class GetTools:
 
     def category(self, search_term, guild=None):
         """Get a channel category from the current or specified guild.
+
         Parameters
         -----------
         search_term: :class:`id` or :class:`str`
@@ -233,6 +246,7 @@ class GetTools:
         guild: :class:`discord.Guild`, :obj:`int` or :obj:`str`, optional
             Specify guild other than the current one. Accepts a discord
             `Guild`, channel ID as `int`, or channel name as `str`.
+
         Returns
         --------
         :class:`discord.CategoryChannel` or :obj:`None`
@@ -252,6 +266,7 @@ class GetTools:
 
     def member(self, search_term, guild=None):
         """Get a member from the current or specified guild.
+
         Parameters
         -----------
         search_term: :class:`id` or :class:`str`
@@ -259,6 +274,7 @@ class GetTools:
         guild: :class:`discord.Guild`, :obj:`int` or :obj:`str`, optional
             Specify guild other than the current one. Accepts a discord
             `Guild`, channel ID as `int`, or channel name as `str`.
+
         Returns
         --------
         :class:`discord.Member` or :obj:`None`
@@ -284,6 +300,7 @@ class GetTools:
 
     def role(self, search_term, guild=None):
         """Get a role from the current or specified guild.
+
         Parameters
         -----------
         search_term: :class:`id` or :class:`str`
@@ -291,6 +308,7 @@ class GetTools:
         guild: :class:`discord.Guild`, :obj:`int` or :obj:`str`, optional
             Specify guild other than the current one. Accepts a discord
             `Guild`, channel ID as `int`, or channel name as `str`.
+
         Returns
         --------
         :class:`discord.Role` or :obj:`None`
@@ -310,10 +328,12 @@ class GetTools:
 
     def guild(self, search_term):
         """Get a guild by ID or fuzzymatched name.
+
         Parameters
         -----------
         search_term: :class:`id` or :class:`str`
             The guild ID or name
+
         Returns
         --------
         :class:`discord.Guild` or :obj:`None`
@@ -327,10 +347,12 @@ class GetTools:
 
     def emoji(self, search_term):
         """Get an emoji by ID or name.
+
         Parameters
         -----------
         search_term: :class:`id` or :class:`str`
             The emoji ID or name
+
         Returns
         --------
         :class:`discord.Emoji` or :obj:`None`

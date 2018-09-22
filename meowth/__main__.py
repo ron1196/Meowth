@@ -4995,6 +4995,7 @@ async def research(ctx, *, details = None):
         await confirmation.delete()
         await message.delete()
     
+    
 @Meowth.command(aliases=['event'])
 @checks.allowmeetupreport()
 async def meetup(ctx, *,location:commands.clean_content(fix_channel_mentions=True)=""):
@@ -7295,6 +7296,10 @@ async def research(ctx):
     await ctx.channel.send(embed=discord.Embed(colour=ctx.guild.me.colour, description=listmsg))
     
 async def _researchlist(ctx):
+    message_split = ctx.message.content.split(' ')
+    if len(message_split) > 2:
+        return await _researchlist_search(ctx, " ".join(message_split[2:]))
+
     research_dict = copy.deepcopy(guild_dict[ctx.guild.id].get('questreport_dict',{}))
     pokestop_emoji = parse_emoji(ctx.guild, ':pokestop:')
     questmsg = ""
@@ -7306,19 +7311,52 @@ async def _researchlist(ctx):
                 if questauthor:
                     if len(questmsg) < 1500:
                         questmsg += (f"\n{pokestop_emoji}  ")
-                        questmsg += _("Reward: {reward}, [PokeStop]({url}): {location}, Quest: {quest}, Reported By: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
+                        questmsg += _("**Reward**: {reward}, **[PokeStop]({url})**: {location}, **Quest**: {quest}, **Reported By**: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
                         questmsg += "\n"
                     else:
                         listmsg = _('Meowth! **Here\'s the current research reports for {channel}**\n{questmsg}').format(channel=ctx.message.channel.name.capitalize(),questmsg=questmsg)
                         await ctx.channel.send(embed=discord.Embed(colour=ctx.guild.me.colour, description=listmsg))
                         questmsg = ""
                         questmsg += (f"\n{pokestop_emoji}  ")
-                        questmsg += _("Reward: {reward}, [PokeStop]({url}): {location}, Quest: {quest}, Reported By: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
+                        questmsg += _("**Reward**: {reward}, **[PokeStop]({url})**: {location}, **Quest**: {quest}, **Reported By**: {author}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None))
                         questmsg += "\n"
             except discord.errors.NotFound:
                 continue
     if questmsg:
         listmsg = _(' **Here\'s the current research reports for {channel}**\n{questmsg}').format(channel=ctx.message.channel.name.capitalize(),questmsg=questmsg)
+    else:
+        listmsg = _(" There are no reported research reports. Report one with **!research**")
+    return listmsg
+    
+async def _researchlist_search(ctx, query):
+    research_dict = copy.deepcopy(guild_dict[ctx.guild.id].get('questreport_dict',{}))
+    pokestop_emoji = parse_emoji(ctx.guild, ':pokestop:')
+    questmsg = ""
+    for questid in research_dict:
+        try:
+            questreportcha = ctx.guild.get_channel(research_dict[questid]['reportchannel'])
+            if not questreportcha:
+                continue
+            questreportmsg = await questreportcha.get_message(questid)
+            questauthor = ctx.channel.guild.get_member(research_dict[questid]['reportauthor'])
+            pkmn_match = next((p for p in pkmn_info['pokemon_list'] if re.sub('[^a-zA-Z0-9]', '', p) == re.sub('[^a-zA-Z0-9]', '', research_dict[questid]['reward'].title().lower())), None)
+            if query and pkmn_match and query.lower() == pkmn_match.lower():
+                if questauthor:
+                    if len(questmsg) < 1500:
+                        questmsg += (f"\n{pokestop_emoji}  ")
+                        questmsg += _("**Reward**: {reward}, **[PokeStop]({url})**: {location}, **Quest**: {quest}, **Reported By**: {author}, **Reported Channel**: {channel}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None), channel=questreportcha.name)
+                        questmsg += "\n"
+                    else:
+                        listmsg = _('Meowth! **Here\'s the current research reports for every channel**\n{questmsg}').format(channel=ctx.message.channel.name.capitalize(),questmsg=questmsg)
+                        await ctx.channel.send(embed=discord.Embed(colour=ctx.guild.me.colour, description=listmsg))
+                        questmsg = ""
+                        questmsg += (f"\n{pokestop_emoji}  ")
+                        questmsg += _("**Reward**: {reward}, **[PokeStop]({url})**: {location}, **Quest**: {quest}, **Reported By**: {author}, **Reported Channel**: {channel}").format(location=research_dict[questid]['location'].title(),quest=research_dict[questid]['quest'].title(),reward=research_dict[questid]['reward'].title(), author=questauthor.display_name, url=research_dict[questid].get('url',None), channel=questreportcha.name)
+                        questmsg += "\n"
+        except discord.errors.NotFound:
+            continue
+    if questmsg:
+        listmsg = _(' **Here\'s the current research reports for every channel**\n{questmsg}').format(channel=ctx.message.channel.name.capitalize(),questmsg=questmsg)
     else:
         listmsg = _(" There are no reported research reports. Report one with **!research**")
     return listmsg
